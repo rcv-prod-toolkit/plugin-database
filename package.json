@@ -1,8 +1,8 @@
 {
-  "name": "database",
+  "name": "plugin-database",
   "version": "1.0.0",
   "description": "Module that provides Database connection",
-  "author": "Himyu",
+  "author": "RCVolus",
   "license": "MIT",
   "toolkit": {
     "modes": [
@@ -17,7 +17,7 @@
     "mongodb": "^3.6.9"
   },
   "devDependencies": {
-    "league-prod-toolkit": "file:../..",
+    "rcv-prod-toolkit-types": "^1.0.1",
     "@types/mongodb": "^3.6.17",
     "typescript": "^4.3.2"
   },

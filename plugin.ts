@@ -1,4 +1,4 @@
-import { PluginContext } from 'league-prod-toolkit/core/modules/Module'
+import { PluginContext } from 'rcv-prod-toolkit-types'
 import type { Config } from './types/Config'
 import { MongoClient, Collection, ObjectID, ObjectId } from 'mongodb';
 
@@ -44,30 +44,6 @@ module.exports = async (ctx: PluginContext) => {
     }
   }
   init()
-
-  // Answer requests to get state
-  ctx.LPTE.on(namespace, 'createCollection', async (e: any) => {
-    if (!e.collection) {
-      return ctx.log.warn('no collection passed for createCollection')
-    }
-
-    if (collections.length > 0) {
-      const finding = collections.find(c => 
-        c.collectionName == e.collection
-      )
-
-      if (finding !== undefined) {
-        return ctx.log.debug(`collection ${e.collection} already exists`)
-      }
-    }
-
-    try {
-      await client.db().createCollection(e.collection)
-      collections = await client.db().collections()
-    } catch (err: any) {
-      ctx.log.error(err.message);
-    }
-  });
 
   // Answer requests to get state
   ctx.LPTE.on(namespace, 'request', async (e: any) => {
