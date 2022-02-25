@@ -1,4 +1,4 @@
-import { PluginContext } from 'rcv-prod-toolkit-types'
+import { PluginContext } from '@rcv-prod-toolkit/types'
 import type { Config } from './types/Config'
 import { MongoClient, Collection, ObjectID, ObjectId } from 'mongodb';
 
