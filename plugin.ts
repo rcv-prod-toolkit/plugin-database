@@ -2,13 +2,14 @@ import { PluginContext } from '@rcv-prod-toolkit/types'
 import type { Config } from './types/Config'
 import { MongoClient, Collection, ObjectID, ObjectId } from 'mongodb';
 
-const namespace = 'database';
 
 module.exports = async (ctx: PluginContext) => {
+  const namespace = ctx.plugin.module.getName();
+
   const configRes = await ctx.LPTE.request({
     meta: {
       type: 'request',
-      namespace: 'config',
+      namespace: 'plugin-config',
       version: 1
     }
   });
