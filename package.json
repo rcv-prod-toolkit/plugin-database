@@ -14,11 +14,11 @@
     "needsBuild": true
   },
   "dependencies": {
-    "mongodb": "^3.6.9"
+    "node-json-db": "^1.6.0",
+    "sqlite3": "^5.0.8"
   },
   "devDependencies": {
     "@rcv-prod-toolkit/types": "github:rcv-prod-toolkit/types",
-    "@types/mongodb": "^3.6.17",
     "typescript": "^4.3.2"
   },
   "scripts": {

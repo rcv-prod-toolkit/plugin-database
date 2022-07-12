@@ -1,50 +1,19 @@
 import { PluginContext } from '@rcv-prod-toolkit/types'
-import type { Config } from './types/Config'
-import { MongoClient, Collection, ObjectID, ObjectId } from 'mongodb';
-
+import { JsonDB } from 'node-json-db';
+import { Config } from 'node-json-db/dist/lib/JsonDBConfig'
+import uniqid from 'uniqid'
 
 module.exports = async (ctx: PluginContext) => {
   const namespace = ctx.plugin.module.getName();
 
-  const configRes = await ctx.LPTE.request({
-    meta: {
-      type: 'request',
-      namespace: 'plugin-config',
-      version: 1
-    }
-  });
-  if (configRes === undefined) {
-    return ctx.log.warn(`${namespace} config could not be loaded`)
-  }
-  const config = configRes.config as unknown as Config;
+  const config = new Config(
+    `modules/plugin-database/data/league-prod-toolkit`,
+    true,
+    false,
+    '/'
+  )
 
-  let collections : Collection<any>[] = []
-
-  const dbName = 'league-prod-toolkit'
-
-  let uri: string;
-  if (config.password === '') {
-    uri =
-      `mongodb://${config.clusterUrl}:${config.port}/league-prod-toolkit`;
-  } else {
-    uri =
-      `mongodb://${config.user}:${config.password}@${config.clusterUrl}:${config.port}/${dbName}?authSource=admin`;
-  }
-
-  const client = new MongoClient(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-
-  async function init () {
-    try {
-      await client.connect();
-      collections = await client.db().collections()
-    } catch (e) {
-      ctx.log.error(JSON.stringify(e));
-    }
-  }
-  init()
+  const client = new JsonDB(config);
 
   // Answer requests to get state
   ctx.LPTE.on(namespace, 'request', async (e: any) => {
@@ -53,26 +22,26 @@ module.exports = async (ctx: PluginContext) => {
     }
 
     try {
-      const filter = e.filter || {};
-      const sort = e.sort || {};
+      const filter = e.filter;
+      const sort = e.sort;
       const limit = e.limit || 10;
 
-      if (e.id !== undefined) {
-        if (Array.isArray(e.id)) {
-          filter['_id'] = {
-            $in: e.id.map((id : any) => new ObjectId(id))
-          }
-        } else {
-          filter['_id'] = new ObjectId(e.id)
-        }
+      const url = `/${e.collection}${e.id !== undefined ? '/' + e.id : ''}`
+
+      const data = client.getObject<{[k: string]: any}>(url)
+      let array = Object.values(data)
+
+      if (filter !== undefined) {
+        array.filter(filter)
       }
 
-      const data = await client.db()
-        .collection(e.collection)
-        .find(filter)
-        .sort(sort)
-        .limit(limit)
-        .toArray()
+      if (sort !== undefined) {
+        array.sort(sort)
+      }
+
+      if (limit !== undefined) {
+        array.slice(0, limit)
+      }
 
       ctx.LPTE.emit({
         meta: {
@@ -80,10 +49,18 @@ module.exports = async (ctx: PluginContext) => {
           namespace: 'reply',
           version: 1
         },
-        data
+        data: e.id !== undefined ? data : array
       });
     } catch (err: any) {
-      ctx.log.error(err.message);
+      ctx.log.debug(err.message);
+      ctx.LPTE.emit({
+        meta: {
+          type: e.meta.reply,
+          namespace: 'reply',
+          version: 1
+        },
+        err
+      });
     }
   });
 
@@ -93,9 +70,8 @@ module.exports = async (ctx: PluginContext) => {
     }
 
     try {
-      const insert = await client.db()
-        .collection(e.collection)
-        .insertOne(e.data)
+      const id = uniqid()
+      client.push(`/${e.collection}/${id}`, e.data)
 
       ctx.LPTE.emit({
         meta: {
@@ -103,10 +79,10 @@ module.exports = async (ctx: PluginContext) => {
           namespace: 'reply',
           version: 1
         },
-        id: insert.insertedId
+        id
       });
     } catch (err: any) {
-      ctx.log.error(err.message);
+      ctx.log.debug(err.message);
     }
   });
 
@@ -116,12 +92,7 @@ module.exports = async (ctx: PluginContext) => {
     }
 
     try {
-      const query = { '_id': e.id };
-      const values = { $set: e.data };
-
-      await client.db()
-        .collection(e.collection)
-        .updateOne(query, values)
+      client.push(`/${e.collection}/${e.id}`, e.data, true)
 
       ctx.LPTE.emit({
         meta: {
@@ -131,22 +102,19 @@ module.exports = async (ctx: PluginContext) => {
         }
       });
     } catch (err: any) {
-      ctx.log.error(err.message);
+      ctx.log.debug(err.message);
     }
   });
 
   ctx.LPTE.on(namespace, 'delete', async (e: any) => {
     if (!e.collection) {
-      return ctx.log.warn('no collection or id passed for delete')
+      return ctx.log.warn('no collection passed for delete')
     }
 
     try {
-      const filter = e.filter || {};
-      await client.db()
-        .collection(e.collection)
-        .deleteMany(filter)
+      client.delete(`/${e.collection}`)
     } catch (err: any) {
-      ctx.log.error(err.message);
+      ctx.log.debug(err.message);
     }
   });
 
@@ -156,11 +124,7 @@ module.exports = async (ctx: PluginContext) => {
     }
 
     try {
-      const query = { '_id': new ObjectID(e.id) };
-
-      await client.db()
-        .collection(e.collection)
-        .deleteOne(query)
+      client.delete(`/${e.collection}/${e.id}`)
 
       ctx.LPTE.emit({
         meta: {
@@ -170,7 +134,7 @@ module.exports = async (ctx: PluginContext) => {
         }
       });
     } catch (err: any) {
-      ctx.log.error(err.message);
+      ctx.log.debug(err.message);
     }
   });
 
