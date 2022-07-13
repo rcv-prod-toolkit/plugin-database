@@ -1,6 +1,6 @@
 {
   "name": "plugin-database",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Module that provides Database connection",
   "author": "RCVolus",
   "license": "MIT",
