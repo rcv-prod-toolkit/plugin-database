@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "node-json-db": "^1.6.0",
-    "sqlite3": "^5.0.8"
+    "sqlite3": "^5.0.8",
+    "uniqid": "^5.3.0"
   },
   "devDependencies": {
     "@rcv-prod-toolkit/types": "github:rcv-prod-toolkit/types",
