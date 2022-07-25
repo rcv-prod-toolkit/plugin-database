@@ -49,7 +49,7 @@ module.exports = async (ctx: PluginContext) => {
           namespace: 'reply',
           version: 1
         },
-        data: e.id !== undefined ? data : array
+        data: e.id !== undefined ? data : array || []
       });
     } catch (err: any) {
       ctx.log.debug(err.message);
@@ -59,7 +59,7 @@ module.exports = async (ctx: PluginContext) => {
           namespace: 'reply',
           version: 1
         },
-        err
+        data: e.id !== undefined ? undefined : []
       });
     }
   });
