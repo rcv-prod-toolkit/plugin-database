@@ -1,10 +1,10 @@
 import { PluginContext } from '@rcv-prod-toolkit/types'
-import { JsonDB } from 'node-json-db';
+import { JsonDB } from 'node-json-db'
 import { Config } from 'node-json-db/dist/lib/JsonDBConfig'
 import uniqid from 'uniqid'
 
 module.exports = async (ctx: PluginContext) => {
-  const namespace = ctx.plugin.module.getName();
+  const namespace = ctx.plugin.module.getName()
 
   const config = new Config(
     `modules/plugin-database/data/league-prod-toolkit`,
@@ -13,7 +13,7 @@ module.exports = async (ctx: PluginContext) => {
     '/'
   )
 
-  const client = new JsonDB(config);
+  const client = new JsonDB(config)
 
   // Answer requests to get state
   ctx.LPTE.on(namespace, 'request', async (e: any) => {
@@ -22,13 +22,13 @@ module.exports = async (ctx: PluginContext) => {
     }
 
     try {
-      const filter = e.filter;
-      const sort = e.sort;
-      const limit = e.limit || 10;
+      const filter = e.filter
+      const sort = e.sort
+      const limit = e.limit || 10
 
       const url = `/${e.collection}${e.id !== undefined ? '/' + e.id : ''}`
 
-      const data = client.getObject<{[k: string]: any}>(url)
+      const data = client.getObject<{ [k: string]: any }>(url)
       let array = Object.values(data)
 
       if (filter !== undefined) {
@@ -50,9 +50,9 @@ module.exports = async (ctx: PluginContext) => {
           version: 1
         },
         data: e.id !== undefined ? data : array || []
-      });
+      })
     } catch (err: any) {
-      ctx.log.debug(err.message);
+      ctx.log.debug(err.message)
       ctx.LPTE.emit({
         meta: {
           type: e.meta.reply,
@@ -60,9 +60,9 @@ module.exports = async (ctx: PluginContext) => {
           version: 1
         },
         data: e.id !== undefined ? undefined : []
-      });
+      })
     }
-  });
+  })
 
   ctx.LPTE.on(namespace, 'insertOne', async (e: any) => {
     if (!e.collection) {
@@ -71,7 +71,7 @@ module.exports = async (ctx: PluginContext) => {
 
     try {
       const id = uniqid()
-      client.push(`/${e.collection}/${id}`, {id: id, ...e.data})
+      client.push(`/${e.collection}/${id}`, { id: id, ...e.data })
 
       ctx.LPTE.emit({
         meta: {
@@ -80,11 +80,11 @@ module.exports = async (ctx: PluginContext) => {
           version: 1
         },
         id
-      });
+      })
     } catch (err: any) {
-      ctx.log.debug(err.message);
+      ctx.log.debug(err.message)
     }
-  });
+  })
 
   ctx.LPTE.on(namespace, 'updateOne', async (e: any) => {
     if (!e.collection || !e.id) {
@@ -100,11 +100,11 @@ module.exports = async (ctx: PluginContext) => {
           namespace: 'reply',
           version: 1
         }
-      });
+      })
     } catch (err: any) {
-      ctx.log.debug(err.message);
+      ctx.log.debug(err.message)
     }
-  });
+  })
 
   ctx.LPTE.on(namespace, 'delete', async (e: any) => {
     if (!e.collection) {
@@ -114,9 +114,9 @@ module.exports = async (ctx: PluginContext) => {
     try {
       client.delete(`/${e.collection}`)
     } catch (err: any) {
-      ctx.log.debug(err.message);
+      ctx.log.debug(err.message)
     }
-  });
+  })
 
   ctx.LPTE.on(namespace, 'deleteOne', async (e: any) => {
     if (!e.collection || !e.id) {
@@ -132,11 +132,11 @@ module.exports = async (ctx: PluginContext) => {
           namespace: 'reply',
           version: 1
         }
-      });
+      })
     } catch (err: any) {
-      ctx.log.debug(err.message);
+      ctx.log.debug(err.message)
     }
-  });
+  })
 
   // Emit event that we're ready to operate
   ctx.LPTE.emit({
@@ -146,5 +146,5 @@ module.exports = async (ctx: PluginContext) => {
       version: 1
     },
     status: 'RUNNING'
-  });
-};
+  })
+}
