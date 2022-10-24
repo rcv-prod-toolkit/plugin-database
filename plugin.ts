@@ -120,7 +120,7 @@ module.exports = async (ctx: PluginContext) => {
 
   ctx.LPTE.on(namespace, 'deleteOne', async (e: any) => {
     if (!e.collection || !e.id) {
-      return ctx.log.warn('no collection or id passed for updateOne')
+      return ctx.log.warn('no collection or id passed for deleteOne')
     }
 
     try {
