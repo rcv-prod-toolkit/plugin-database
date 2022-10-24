@@ -32,15 +32,15 @@ module.exports = async (ctx: PluginContext) => {
       let array = Object.values(data)
 
       if (filter !== undefined) {
-        array.filter(filter)
+        array = array.filter(filter)
       }
 
       if (sort !== undefined) {
-        array.sort(sort)
+        array = array.sort(sort)
       }
 
       if (limit !== undefined) {
-        array.slice(0, limit)
+        array = array.slice(0, limit)
       }
 
       ctx.LPTE.emit({
