@@ -71,7 +71,7 @@ module.exports = async (ctx: PluginContext) => {
 
     try {
       const id = uniqid()
-      client.push(`/${e.collection}/${id}`, { id: id, ...e.data })
+      client.push(`/${e.collection}/${id}`, { id: id, ...e.data }, true)
 
       ctx.LPTE.emit({
         meta: {
@@ -92,7 +92,7 @@ module.exports = async (ctx: PluginContext) => {
     }
 
     try {
-      client.push(`/${e.collection}/${e.id}`, e.data, true)
+      client.push(`/${e.collection}/${e.id}`, e.data, false)
 
       ctx.LPTE.emit({
         meta: {
