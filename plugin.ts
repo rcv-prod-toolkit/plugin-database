@@ -6,8 +6,10 @@ import uniqid from 'uniqid'
 module.exports = async (ctx: PluginContext) => {
   const namespace = ctx.plugin.module.getName()
 
+  const dbPath = process.env.DBPATH || `modules/plugin-database/data/league-prod-toolkit`
+
   const config = new Config(
-    `modules/plugin-database/data/league-prod-toolkit`,
+    dbPath,
     true,
     false,
     '/'
