@@ -26,7 +26,7 @@ module.exports = async (ctx: PluginContext) => {
 
       const url = `/${e.collection}${e.id !== undefined ? '/' + e.id : ''}`
 
-      const data = client.getObject<{ [k: string]: any }>(url)
+      const data = await client.getObject<{ [k: string]: any }>(url)
       let array = Object.values(data)
 
       if (filter !== undefined) {
@@ -41,6 +41,8 @@ module.exports = async (ctx: PluginContext) => {
         array = array.slice(0, limit)
       }
 
+      console.log(data, array)
+
       ctx.LPTE.emit({
         meta: {
           type: e.meta.reply,
@@ -50,7 +52,6 @@ module.exports = async (ctx: PluginContext) => {
         data: e.id !== undefined ? data : array || []
       })
     } catch (err: any) {
-      ctx.log.debug(err.message)
       ctx.LPTE.emit({
         meta: {
           type: e.meta.reply,
