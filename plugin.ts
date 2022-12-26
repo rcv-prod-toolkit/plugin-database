@@ -41,8 +41,6 @@ module.exports = async (ctx: PluginContext) => {
         array = array.slice(0, limit)
       }
 
-      console.log(data, array)
-
       ctx.LPTE.emit({
         meta: {
           type: e.meta.reply,
@@ -52,6 +50,7 @@ module.exports = async (ctx: PluginContext) => {
         data: e.id !== undefined ? data : array || []
       })
     } catch (err: any) {
+      ctx.log.debug(err.message)
       ctx.LPTE.emit({
         meta: {
           type: e.meta.reply,
